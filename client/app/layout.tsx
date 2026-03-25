@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Stellar Dapp",
+  title: "SoundChain — Decentralized Music Platform",
   description:
-    "Fullstack Dapp built on Stellar",
+    "Upload, stream, and own your music on the Stellar blockchain. Powered by Soroban smart contracts.",
 };
 
 export default function RootLayout({

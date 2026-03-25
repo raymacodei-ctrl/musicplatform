@@ -26,7 +26,7 @@ import {
 
 /** Your deployed Soroban contract ID */
 export const CONTRACT_ADDRESS =
-  "CDJVMAX34YRCQ5JFC6SIOQOVSUY6XWEFYJOLF3SBCKU7CMI3IAP6HPWN";
+  "CBCRFFKFLAMOQXOP52QNFXRD4E6SZQFAGEZVIFLVPTOHEVRTWHOJME6X";
 
 /** Network passphrase (testnet by default) */
 export const NETWORK_PASSPHRASE = Networks.TESTNET;
@@ -212,57 +212,49 @@ export function toScValBool(value: boolean): xdr.ScVal {
 }
 
 // ============================================================
-// Supply Chain Tracker — Contract Methods
+// Decentralized Music Platform — Contract Methods
 // ============================================================
 
+export interface Song {
+  artist: string;
+  title: string;
+  ipfs: string;
+}
+
 /**
- * Add a product to the supply chain.
- * Calls: add_product(product_id: String, origin: String)
+ * Upload a song to the platform.
+ * Calls: upload_song(artist: String, title: String, ipfs_hash: String)
  */
-export async function addProduct(
+export async function uploadSong(
   caller: string,
-  productId: string,
-  origin: string
+  artist: string,
+  title: string,
+  ipfsHash: string
 ) {
   return callContract(
-    "add_product",
-    [toScValString(productId), toScValString(origin)],
+    "upload_song",
+    [toScValString(artist), toScValString(title), toScValString(ipfsHash)],
     caller,
     true
   );
 }
 
 /**
- * Update a product's status.
- * Calls: update_status(product_id: String, new_status: String)
+ * Get all songs from the platform (read-only).
+ * Calls: get_songs() -> Vec<Map<Symbol, String>>
+ * Returns: Song[] or null
  */
-export async function updateProductStatus(
-  caller: string,
-  productId: string,
-  newStatus: string
-) {
-  return callContract(
-    "update_status",
-    [toScValString(productId), toScValString(newStatus)],
-    caller,
-    true
-  );
-}
-
-/**
- * Get product details (read-only).
- * Calls: get_product(product_id: String) -> Map<Symbol, String>
- * Returns: { origin: string, status: string } or null
- */
-export async function getProduct(
-  productId: string,
-  caller?: string
-) {
-  return readContract(
-    "get_product",
-    [toScValString(productId)],
-    caller
-  );
+export async function getSongs(caller?: string): Promise<Song[] | null> {
+  const result = await readContract("get_songs", [], caller);
+  if (!result) return null;
+  if (Array.isArray(result)) {
+    return result.map((entry: Record<string, string>) => ({
+      artist: String(entry.artist ?? ""),
+      title: String(entry.title ?? ""),
+      ipfs: String(entry.ipfs ?? ""),
+    }));
+  }
+  return null;
 }
 
 export { nativeToScVal, scValToNative, Address, xdr };
